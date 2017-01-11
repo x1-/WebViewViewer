@@ -31,14 +31,19 @@ public class MainActivity extends Activity {
                 urlEdit.setText( url );
                 return super.shouldOverrideUrlLoading(view, url);
             }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                super.onPageFinished(view, url);
+            }
         });
         wv.getSettings().setJavaScriptEnabled(true);
         wv.getSettings().setBuiltInZoomControls(true);
 
-        int SDK_INT = android.os.Build.VERSION.SDK_INT;
-        if (SDK_INT > 16) {
-            wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
-        }
+//        int SDK_INT = android.os.Build.VERSION.SDK_INT;
+//        if (SDK_INT > 16) {
+//            wv.getSettings().setMediaPlaybackRequiresUserGesture(false);
+//        }
 
         urlEdit = (EditText)findViewById(R.id.url);
         urlEdit.setText( "http://" );
