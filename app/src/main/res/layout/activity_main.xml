@@ -21,14 +21,11 @@
         <LinearLayout
             android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true">
+            android:layout_height="wrap_content">
 
             <EditText
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
                 android:inputType="textUri"
                 android:ems="10"
                 android:id="@+id/url"
@@ -46,10 +43,82 @@
                 android:layout_weight="1" />
 
         </LinearLayout>
-        <WebView
+        <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <Space
+                android:layout_width="143dip"
+                android:layout_height="match_parent" />
+            <Button
+                android:text="@string/show_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonShow" />
+            <Button
+                android:text="Back"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonBack" />
+        </LinearLayout>
+
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:id="@+id/wv" >
-        </WebView>
+            android:layout_height="match_parent">
+            <WebView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/wv" >
+            </WebView>
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/html"
+                android:layout_marginRight="10dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginTop="10dip"
+                android:layout_marginBottom="10dip"
+                android:layout_gravity="bottom"
+                android:alpha="0.8"
+                android:inputType="none"
+                android:maxLines="2000"
+                android:background="#d9efef"
+                android:visibility="gone"
+                android:textSize="18sp"
+                android:textColor="@android:color/black" />
+<!--
+                android:textIsSelectable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+-->
+
+            <!-- TextView
+                android:layout_width="match_parent"
+                android:layout_height="200dip"
+                android:id="@+id/html2"
+                android:layout_gravity="bottom"
+                android:alpha="0.8"
+                android:maxLines="2000"
+                android:scrollbars="vertical"
+                android:background="#d9efef"
+                android:visibility="visible"
+                android:layout_marginRight="10dip"
+                android:layout_marginLeft="10dip"
+                android:layout_marginBottom="10dip"
+                android:textIsSelectable="true"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:textSize="18sp"
+                android:textColor="@android:color/black" / -->
+
+        </FrameLayout>
+        <!-- LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+        </LinearLayout -->
+
     </LinearLayout>
 </RelativeLayout>
