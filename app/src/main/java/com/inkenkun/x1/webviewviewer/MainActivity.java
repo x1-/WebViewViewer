@@ -1,9 +1,10 @@
 package com.inkenkun.x1.webviewviewer;
 
+import java.io.IOException;
+
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,49 +30,64 @@ public class MainActivity extends Activity {
     private TextView htmlView;
     private WebView wv;
     private Button show;
-    private Boolean loaded = false;
-    private String advertisingId = "";
-
+    private Button posSetter;
+    private Boolean synced = false;
+    // AdvertisingID
+    private String advertisingId;
+    // OptOut
+    private boolean isAdTrackingEnabled = false;
     private Handler handler;
+
+    public MainActivity() {
+        super();
+    }
 
     @Override
     protected void onCreate( Bundle savedInstanceState ) {
         super.onCreate( savedInstanceState );
         setContentView( R.layout.activity_main );
 
-//        AsyncTask<Void, Void, String> task = new AdIdTask(this);
-//        task.execute();
+        syncAdvertisingId();
 
         wv = (WebView)findViewById(R.id.wv);
         htmlView = (TextView) findViewById(R.id.html);
         show = (Button) findViewById(R.id.buttonShow);
+        posSetter = (Button) findViewById(R.id.buttonSetPos);
 
         wv.setWebViewClient(new WebViewClient(){
 
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                urlEdit.setText( url );
+                if ( url.startsWith("http") ) {
+                    urlEdit.setText( url );
+                }
                 return super.shouldOverrideUrlLoading(view, url);
             }
 
             @Override
             public void onPageStarted(WebView view, String url, Bitmap favicon) {
                 super.onPageStarted(view, url, favicon);
-                urlEdit.setText( url );
-                loaded = false;
+                if ( url.startsWith("http") ) {
+                    urlEdit.setText( url );
+                }
             }
 
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                loaded = true;
-                setAdvertisingId();
             }
+
+            @Override
+            public void onLoadResource(WebView view, String url) {
+                if (url.startsWith("x1scheme://")) {
+                    setAdvertisingId();
+                }
+            }
+
         });
         wv.getSettings().setCacheMode(WebSettings.LOAD_NO_CACHE);
         wv.getSettings().setJavaScriptEnabled(true);
         wv.getSettings().setBuiltInZoomControls(true);
-        wv.addJavascriptInterface(this, "activity");
 
         int SDK_INT = android.os.Build.VERSION.SDK_INT;
         if (SDK_INT > 16) {
@@ -137,6 +153,19 @@ public class MainActivity extends Activity {
                 }
             }
         });
+        findViewById( R.id.buttonSetPos ).setOnClickListener( new View.OnClickListener() {
+            @Override
+            public void onClick( View v ) {
+                String caption = posSetter.getText().toString();
+                if ( caption.equals( getString(R.string.set_pos_name) ) ) {
+                    wv.loadUrl( "javascript:setFramePos(735, 735, 0);" );
+                    posSetter.setText( getString(R.string.unset_pos_name) );
+                } else {
+                    wv.loadUrl( "javascript:setFramePos(735, 0, 0);" );
+                    posSetter.setText( getString(R.string.set_pos_name) );
+                }
+            }
+        });
 
         handler = new Handler();
     }
@@ -173,42 +202,36 @@ public class MainActivity extends Activity {
         imm.hideSoftInputFromWindow(urlEdit.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 
-    private void setAdvertisingId() {
-        if ( loaded && !advertisingId.isEmpty() ) {
-            //wv.loadUrl( "javascript:" + script + "'" + advertisingId + "');" );
-            Log.i( "AdvertisingID", advertisingId );
-        }
-    }
-
-    class AdIdTask extends AsyncTask<Void, Void, String> {
-        private Activity mActivity;
-
-        AdIdTask(Activity activity) {
-            mActivity = activity;
-        }
-
-        @Override
-        protected String doInBackground(Void... params) {
-            String advertisingId = "";
-            try {
-                AdvertisingIdClient.Info info =
-                        AdvertisingIdClient.getAdvertisingIdInfo(mActivity.getApplicationContext());
-                advertisingId = info.getId();
-            } catch (GooglePlayServicesNotAvailableException e) {
-                Log.e("AdvertisingId", "GooglePlayServices are not available.");
-            } catch (GooglePlayServicesRepairableException e) {
-                Log.e("AdvertisingId", "GooglePlayServices are not repairable.");
-            } catch (Exception e) {
-                Log.e("AdvertisingId", "Exception occurred.");
+    private void syncAdvertisingId() {
+        Thread sync = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                AdvertisingIdClient.Info info = null;
+                try {
+                    info = AdvertisingIdClient.getAdvertisingIdInfo(getApplicationContext());
+                    advertisingId = info.getId();
+                    isAdTrackingEnabled = info.isLimitAdTrackingEnabled();
+                    Log.d( "DEBUG", "Android AdvertisingId : " + advertisingId );
+                    Log.d( "DEBUG", "OptoutFlag : " + String.valueOf(isAdTrackingEnabled) );
+                    synced = true;
+                } catch (IOException e) {
+                    Log.d( "DEBUG", "GooglePlayServicesへの接続失敗" );
+                } catch (IllegalStateException e) {
+                    Log.d( "DEBUG", "メインスレッドで処理が呼ばれた" );
+                } catch (GooglePlayServicesNotAvailableException e) {
+                    Log.d( "DEBUG", "GooglePlayがデバイスにインストールされていなかった" );
+                } catch (GooglePlayServicesRepairableException e) {
+                    Log.d( "DEBUG", "GooglePlayServicesを使ううえでエラーが起きた" );
+                }
             }
-            return advertisingId;
-        }
-
-        @Override
-        protected void onPostExecute(String id) {
-            advertisingId = id;
-            setAdvertisingId();
-        }
+        });
+        sync.start();
     }
 
+    private void setAdvertisingId() {
+        if ( synced ) {
+            wv.loadUrl( "javascript:setIDFAOption('" + advertisingId + "', " + isAdTrackingEnabled + ");" );
+            Log.d( "DEBUG", "javascript:setIDFAOption:" + advertisingId );
+        }
+    }
 }

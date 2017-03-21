@@ -26,6 +26,5 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.1.0'
     compile 'com.google.android.gms:play-services:10.+'
-
     testCompile 'junit:junit:4.12'
 }

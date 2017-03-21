@@ -2,4 +2,6 @@
     <string name="app_name">WebViewViewer</string>
     <string name="show_name">SHOW SOURCE</string>
     <string name="hide_name">HIDE SOURCE</string>
+    <string name="set_pos_name">SET POSITION</string>
+    <string name="unset_pos_name">UNSET POSITION</string>
 </resources>

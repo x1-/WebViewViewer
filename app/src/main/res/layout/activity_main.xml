@@ -49,8 +49,13 @@
             android:layout_height="wrap_content">
 
             <Space
-                android:layout_width="143dip"
+                android:layout_width="20dip"
                 android:layout_height="match_parent" />
+            <Button
+                android:text="@string/set_pos_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/buttonSetPos" />
             <Button
                 android:text="@string/show_name"
                 android:layout_width="wrap_content"
